@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Sistema Solar - Exploração 3D</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <!-- Container 3D WebGL -->
+    <div id="canvas-container"></div>
+
+    <!-- Tela de Carregamento Premium -->
+    <div id="loading-screen" class="loading-screen">
+      <div class="loader-content">
+        <div class="mission-badge">EXPLORAÇÃO ESPACIAL</div>
+        <h1 class="loader-title">SISTEMA SOLAR <span>3D</span></h1>
+        <div class="progress-bar-container">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="loading-status" class="loading-status">Inicializando simulação orbital...</div>
+        <div class="loader-tip">Use arrasto para orbitar e scroll/pinça para zoom.</div>
+      </div>
+    </div>
+
+    <!-- Interface HUD Principal -->
+    <div id="hud-overlay" class="hud-overlay">
+      <!-- Cabeçalho Superior -->
+      <header class="hud-header">
+        <div class="hud-brand">
+          <span class="nasa-dot"></span>
+          <span class="hud-logo">SISTEMA SOLAR</span>
+          <span class="hud-badge">EXPLORAÇÃO 3D</span>
+        </div>
+        <div class="hud-coords" id="telemetry-time">
+          TEMPO SIMULADO: <span id="clock-display">ATIVO</span>
+        </div>
+      </header>
+
+      <!-- Barra de Navegação de Planetas (Desktop: Esquerda / Mobile: Chips Horizontais) -->
+      <nav class="hud-nav" id="hud-nav" aria-label="Navegação Celestial">
+        <div class="nav-label">DESTINOS</div>
+        <div class="nav-buttons-container">
+          <button class="nav-btn active" data-target="overview" title="Visão Geral do Sistema">
+            <span class="btn-icon">🌌</span>
+            <span class="btn-text">Geral</span>
+          </button>
+          <button class="nav-btn" data-target="sun" title="Sol">
+            <span class="btn-icon">☀️</span>
+            <span class="btn-text">Sol</span>
+          </button>
+          <button class="nav-btn" data-target="mercury" title="Mercúrio">
+            <span class="btn-icon">⚪</span>
+            <span class="btn-text">Mercúrio</span>
+          </button>
+          <button class="nav-btn" data-target="venus" title="Vênus">
+            <span class="btn-icon">🟡</span>
+            <span class="btn-text">Vênus</span>
+          </button>
+          <button class="nav-btn" data-target="earth" title="Terra">
+            <span class="btn-icon">🌍</span>
+            <span class="btn-text">Terra</span>
+          </button>
+          <button class="nav-btn sub-item" data-target="moon" title="Lua">
+            <span class="btn-icon">🌑</span>
+            <span class="btn-text">Lua</span>
+          </button>
+          <button class="nav-btn" data-target="mars" title="Marte">
+            <span class="btn-icon">🔴</span>
+            <span class="btn-text">Marte</span>
+          </button>
+          <button class="nav-btn" data-target="jupiter" title="Júpiter">
+            <span class="btn-icon">🟠</span>
+            <span class="btn-text">Júpiter</span>
+          </button>
+          <button class="nav-btn" data-target="saturn" title="Saturno">
+            <span class="btn-icon">🪐</span>
+            <span class="btn-text">Saturno</span>
+          </button>
+          <button class="nav-btn" data-target="uranus" title="Urano">
+            <span class="btn-icon">🔵</span>
+            <span class="btn-text">Urano</span>
+          </button>
+          <button class="nav-btn" data-target="neptune" title="Netuno">
+            <span class="btn-icon">🔷</span>
+            <span class="btn-text">Netuno</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Painel de Informações (Desktop: Direita / Mobile: Bottom Sheet) -->
+      <aside id="info-panel" class="info-panel">
+        <!-- Alça de arrasto/toque estilo Bottom Sheet para mobile -->
+        <div class="bottom-sheet-handle" id="bottom-sheet-handle"></div>
+
+        <div class="panel-header">
+          <div class="body-type-badge" id="body-type">ESTRELA ANÃ AMARELA</div>
+          <button id="close-panel-btn" class="panel-close-btn" title="Minimizar Informações">✕</button>
+        </div>
+
+        <div class="panel-main-info">
+          <h2 class="body-title" id="body-name">Sol</h2>
+          <p class="body-description" id="body-desc">
+            O Sol é a estrela central do nosso Sistema Solar, contendo 99,86% de toda a massa do sistema.
+          </p>
+        </div>
+
+        <div class="panel-stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">DIÂMETRO</span>
+            <span class="stat-value" id="stat-diameter">1.392.700 km</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">DISTÂNCIA MÉDIA</span>
+            <span class="stat-value" id="stat-distance">Centro</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">PERÍODO ORBITAL</span>
+            <span class="stat-value" id="stat-orbit">230 Ma</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">DURAÇÃO DO DIA</span>
+            <span class="stat-value" id="stat-day">25 a 35 d</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">LUAS NATURAIS</span>
+            <span class="stat-value" id="stat-moons">0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">TEMPERATURA</span>
+            <span class="stat-value" id="stat-temp">5.500 °C</span>
+          </div>
+        </div>
+
+        <div class="panel-actions">
+          <button id="focus-btn" class="hud-action-btn primary">
+            <span class="action-icon">🎯</span> Focar
+          </button>
+          <button id="reset-cam-btn" class="hud-action-btn secondary">
+            <span class="action-icon">🔄</span> Visão Geral
+          </button>
+        </div>
+      </aside>
+
+      <!-- Barra de Controle Inferior Minimalista -->
+      <footer class="hud-controls">
+        <div class="controls-group playback-controls">
+          <button id="play-pause-btn" class="ctrl-btn" title="Pausar ou Retomar Translação">
+            <span id="play-pause-icon">⏸️</span>
+            <span id="play-pause-text" class="btn-label-desktop">Pausar</span>
+          </button>
+          <div class="speed-control">
+            <label for="speed-slider" class="ctrl-label">VELOCIDADE: <span id="speed-display">1.0x</span></label>
+            <input type="range" id="speed-slider" min="0" max="5" step="0.2" value="1.0" class="hud-slider" />
+          </div>
+        </div>
+
+        <div class="controls-group view-toggles">
+          <button id="toggle-orbits-btn" class="ctrl-btn active" title="Alternar Linhas de Órbita">
+            <span>⭕ Órbitas</span>
+          </button>
+          <button id="toggle-clouds-btn" class="ctrl-btn active" title="Alternar Nuvens da Terra">
+            <span>☁️ Nuvens</span>
+          </button>
+          <button id="toggle-info-btn" class="ctrl-btn" title="Alternar Painel de Informações">
+            <span>📊 Info</span>
+          </button>
+        </div>
+      </footer>
+
+      <!-- Tooltip Flutuante para Hover 3D -->
+      <div id="planet-tooltip" class="planet-tooltip"></div>
+    </div>
+
+    <!-- Script de Inicialização -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
